@@ -1,13 +1,28 @@
-package com.contactmanagement.service;
+package com.management.contact;
 
-import com.contactmanagement.entity.Contact;
-import com.contactmanagement.repository.ContactRepository;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ContactManagementApiApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ContactManagementApiApplication.class, args);
+	}
+
+}
+
+
+import com.management.contact.model.Contact;
+import com.management.contact.repository.ContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Service class for handling contact-related operations.
+ */
 @Service
 public class ContactService {
 
@@ -22,23 +37,18 @@ public class ContactService {
     }
 
     /**
-     * Get contact by ID
+     * Get contact by id
      */
-    public Optional<Contact> getContactById(Long id) {
-        return contactRepository.findById(id);
+    public Contact getContactById(Long id) {
+        return contactRepository.findById(id)
+                .orElseThrow(() -> new ContactNotFoundException("Contact not found with id: " + id));
     }
 
-    /**
-     * Get contact by email
-     */
-    public Optional<Contact> getContactByEmail(String email) {
-        return contactRepository.findByEmail(email);
-    }
 
     /**
-     * Create new contact
+     * Save contact
      */
-    public Contact createContact(Contact contact) {
+    public Contact saveContact(Contact contact) {
         return contactRepository.save(contact);
     }
 
@@ -46,20 +56,17 @@ public class ContactService {
      * Update contact
      */
     public Contact updateContact(Long id, Contact contactDetails) {
-        Optional<Contact> contact = contactRepository.findById(id);
-        if (contact.isPresent()) {
-            Contact existingContact = contact.get();
-            existingContact.setFirstName(contactDetails.getFirstName());
-            existingContact.setLastName(contactDetails.getLastName());
-            existingContact.setEmail(contactDetails.getEmail());
-            existingContact.setPhoneNumber(contactDetails.getPhoneNumber());
-            existingContact.setAddress(contactDetails.getAddress());
-            existingContact.setCity(contactDetails.getCity());
-            existingContact.setState(contactDetails.getState());
-            existingContact.setZipCode(contactDetails.getZipCode());
-            return contactRepository.save(existingContact);
-        }
-        throw new RuntimeException("Contact not found with id: " + id);
+        Contact existingContact = contactRepository.findById(id)
+                .orElseThrow(() -> new ContactNotFoundException("Contact not found with id: " + id));
+        existingContact.setFirstName(contactDetails.getFirstName());
+        existingContact.setLastName(contactDetails.getLastName());
+        existingContact.setEmail(contactDetails.getEmail());
+        existingContact.setPhoneNumber(contactDetails.getPhoneNumber());
+        existingContact.setAddress(contactDetails.getAddress());
+        existingContact.setCity(contactDetails.getCity());
+        existingContact.setState(contactDetails.getState());
+        existingContact.setZipCode(contactDetails.getZipCode());
+        return contactRepository.save(existingContact);
     }
 
     /**
@@ -69,8 +76,16 @@ public class ContactService {
         if (contactRepository.existsById(id)) {
             contactRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Contact not found with id: " + id);
+            throw new ContactNotFoundException("Contact not found with id: " + id);
         }
     }
 }
 
+/**
+ * Custom exception to indicate that a contact was not found.
+ */
+class ContactNotFoundException extends RuntimeException {
+    public ContactNotFoundException(String message) {
+        super(message);
+    }
+}
