@@ -1,6 +1,6 @@
 package com.contactmanagement.service;
 
-import com.contactmanagement.model.Contact;
+import com.contactmanagement.entity.Contact;
 import com.contactmanagement.repository.ContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,22 +14,41 @@ public class ContactService {
     @Autowired
     private ContactRepository contactRepository;
 
+    /**
+     * Get all contacts
+     */
     public List<Contact> getAllContacts() {
         return contactRepository.findAll();
     }
 
+    /**
+     * Get contact by ID
+     */
     public Optional<Contact> getContactById(Long id) {
         return contactRepository.findById(id);
     }
 
+    /**
+     * Get contact by email
+     */
+    public Optional<Contact> getContactByEmail(String email) {
+        return contactRepository.findByEmail(email);
+    }
+
+    /**
+     * Create new contact
+     */
     public Contact createContact(Contact contact) {
         return contactRepository.save(contact);
     }
 
+    /**
+     * Update contact
+     */
     public Contact updateContact(Long id, Contact contactDetails) {
-        Optional<Contact> existingContactOptional = contactRepository.findById(id);
-        if (existingContactOptional.isPresent()) {
-            Contact existingContact = existingContactOptional.get();
+        Optional<Contact> contact = contactRepository.findById(id);
+        if (contact.isPresent()) {
+            Contact existingContact = contact.get();
             existingContact.setFirstName(contactDetails.getFirstName());
             existingContact.setLastName(contactDetails.getLastName());
             existingContact.setEmail(contactDetails.getEmail());
@@ -40,19 +59,18 @@ public class ContactService {
             existingContact.setZipCode(contactDetails.getZipCode());
             return contactRepository.save(existingContact);
         }
-        throw new ContactNotFoundException("Contact not found with id: " + id);
+        throw new RuntimeException("Contact not found with id: " + id);
     }
 
     /**
      * Delete contact
      */
     public void deleteContact(Long id) {
-        contactRepository.deleteById(id);
+        if (contactRepository.existsById(id)) {
+            contactRepository.deleteById(id);
+        } else {
+            throw new RuntimeException("Contact not found with id: " + id);
+        }
     }
 }
 
-class ContactNotFoundException extends RuntimeException {
-    public ContactNotFoundException(String message) {
-        super(message);
-    }
-}
