@@ -59,7 +59,7 @@ public class ContactService {
             existingContact.setZipCode(contactDetails.getZipCode());
             return contactRepository.save(existingContact);
         }
-        throw new RuntimeException("Contact not found with id: " + id);
+        throw new ResourceNotFoundException("Contact not found with id: " + id);
     }
 
     /**
@@ -69,8 +69,13 @@ public class ContactService {
         if (contactRepository.existsById(id)) {
             contactRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Contact not found with id: " + id);
+            throw new ResourceNotFoundException("Contact not found with id: " + id);
+        }
+    }
+
+    public static class ResourceNotFoundException extends RuntimeException {
+        public ResourceNotFoundException(String message) {
+            super(message);
         }
     }
 }
-

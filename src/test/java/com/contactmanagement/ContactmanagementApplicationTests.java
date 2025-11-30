@@ -8,6 +8,7 @@ class ContactmanagementApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// This method is empty to ensure that the application context loads successfully.
 	}
 
 }
