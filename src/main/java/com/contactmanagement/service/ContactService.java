@@ -3,10 +3,20 @@ package com.contactmanagement.service;
 import com.contactmanagement.entity.Contact;
 import com.contactmanagement.repository.ContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 import java.util.Optional;
+
+// Define custom exception in the same file as per agent constraints
+@ResponseStatus(value = HttpStatus.NOT_FOUND)
+class ContactNotFoundException extends RuntimeException {
+    public ContactNotFoundException(String message) {
+        super(message);
+    }
+}
 
 @Service
 public class ContactService {
@@ -59,7 +69,7 @@ public class ContactService {
             existingContact.setZipCode(contactDetails.getZipCode());
             return contactRepository.save(existingContact);
         }
-        throw new RuntimeException("Contact not found with id: " + id);
+        throw new ContactNotFoundException("Contact not found with id: " + id);
     }
 
     /**
@@ -69,8 +79,7 @@ public class ContactService {
         if (contactRepository.existsById(id)) {
             contactRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Contact not found with id: " + id);
+            throw new ContactNotFoundException("Contact not found with id: " + id);
         }
     }
 }
-

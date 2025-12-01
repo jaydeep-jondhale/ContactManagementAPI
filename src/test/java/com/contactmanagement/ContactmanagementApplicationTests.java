@@ -8,6 +8,7 @@ class ContactmanagementApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// This test ensures that the Spring application context can start successfully.
 	}
 
 }
