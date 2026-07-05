@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -52,6 +55,7 @@ public class ContactService {
      * Create new contact
      */
     public Contact createContact(Contact contact) {
+        System.out.println("Creating contact: " + contact.getEmail());
         return contactRepository.save(contact);
     }
 
@@ -79,6 +83,7 @@ public class ContactService {
      * Delete contact
      */
     public void deleteContact(Long id) {
+        System.out.println("Deleting contact with id: " + id);
         if (contactRepository.existsById(id)) {
             contactRepository.deleteById(id);
         } else {
@@ -92,5 +97,20 @@ public class ContactService {
     public int generateRandomNumber() {
         Random random = new Random();
         return random.nextInt(100);
+    }
+
+    /**
+     * Unsafe method vulnerable to XSS
+     */
+    public String getUnsafeHtml(String input) {
+        return "<html><body>" + input + "</body></html>";
+    }
+
+    /**
+     * Unsafe method vulnerable to Path Traversal
+     */
+    public String readFile(String filename) throws IOException {
+        File file = new File("/tmp/" + filename);
+        return new String(Files.readAllBytes(file.toPath()));
     }
 }
